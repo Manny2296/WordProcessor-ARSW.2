@@ -65,10 +65,9 @@ public class TypoSuggestionsEngine {
      * ejemplo por un error típico de digitación identificado.
      *
      * @param word
-     * @param lang
      * @return
      */
-    public String check(String word, Languages lang) {
+    public String check(String word) {
 
         String res = selectedTyposMap.get(word);
         if (res == null) {
