@@ -84,7 +84,7 @@ Parte I. Ejercicio básico.
 	```
 
 9.  Modifique el archivo de configuración de Spring para que el Bean
-    ‘spellChecker‘ ahora haga uso de la clase SpanishSpellChecker (para
+    ‘grammarChecker‘ ahora haga uso de la clase SpanishSpellChecker (para
     que a GrammarChecker se le inyecte *EnglishSpellChecker* en lugar de
     *SpanishSpellChecker*. Verifique el nuevo resultado.
 
