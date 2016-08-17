@@ -7,7 +7,7 @@ package edu.eci.arsw.wordprocessor.view;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileNotFocundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -35,7 +35,10 @@ public class GuordMainFrame extends javax.swing.JFrame {
      * Creates new form GuordMainFrame
      */
     public GuordMainFrame() {
+    	
+    	
         initComponents();
+        tse.setSelectedLanguage(Languages.ENGLISH);
         
         textArea.addCaretListener(new CaretListener() {
 			
@@ -53,7 +56,7 @@ public class GuordMainFrame extends javax.swing.JFrame {
 				else{
 					word=cnt.substring(lastspace+1,pos);	
 				}                                
-				String replacement=tse.check(word,defaultLanguage);
+				String replacement=tse.check(word);
 				
 				if (replacement!=null){
 					final String _word=word;
