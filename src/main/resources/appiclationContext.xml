@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+">
+    <bean name = "GUI" class ="edu.eci.arsw.presentacion.GuordMainFrame">
+        <property name="tse" ref="selector"/>
+    </bean>
+    <bean name="selector" class="edu.eci.arsw.logica.WordProcessor" >
+        <property name="ts" ref="tsPlainText"/>
+        
+      
+    </bean>
+    <bean name="tsSerializable" class="edu.eci.arsw.logica.TypoSuggestBin" >
+        <property name="srz" ref="SerializacionByn"/>   
+        <property name="dts" ref="datasOnline" />
+
+    </bean>
+    
+    <bean name="tsPlainText" class="edu.eci.arsw.logica.TypoSuggestText">
+        <property name="srzPlntxt" ref="Serializaciontxt"/>
+        <property name="dts" ref="datasOnline"/>
+        <property name="crrStyle" ref="Invasiva"/> 
+    </bean>
+    <bean name = "Invasiva" class="edu.eci.arsw.logica.Invasiva"/>
+     <bean name="Limpia" class="edu.eci.arsw.logica.Limpia"/>   
+  
+    
+    <bean name="datasOnline" class="edu.eci.arsw.logica.OnlineDataSource"> 
+        <constructor-arg value="http://190.24.150.86/hcadavid/lang/eng_misspellings.txt"/>
+        <constructor-arg value="http://190.24.150.86/hcadavid/lang/spa_misspellings.txt"/>
+    </bean>
+    
+    <bean name="datasStatic" class="edu.eci.arsw.logica.StaticDataSource"/>  
+    
+    <bean name="Serializaciontxt" class="edu.eci.arsw.persitencia.SerializacionPlainText">
+      
+        
+    </bean>
+    <bean name="SerializacionByn" class="edu.eci.arsw.persitencia.SerializacionBin">
+        
+    </bean>
+    
+</beans>

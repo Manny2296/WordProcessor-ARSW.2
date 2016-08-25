@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.eci.arsw.wordprocessor.view;
+package edu.eci.arsw.presentacion;
 
+import edu.eci.arsw.logica.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,6 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -26,9 +29,18 @@ import javax.swing.event.CaretListener;
  */
 public class GuordMainFrame extends javax.swing.JFrame {
 
-    private TypoSuggestionsEngine tse=new TypoSuggestionsEngine();
-    
-    private String defaultPath="/tmp/";
+    //private TypoSuggestionsEngine tse=new TypoSuggestionsEngine();
+ 
+    WordProcessor tse;
+
+    public WordProcessor getTse() {
+        return tse;
+    }
+
+    public void setTse(WordProcessor tse) {
+        this.tse = tse;
+    }
+ 
     
     private Languages defaultLanguage=Languages.ENGLISH;
     /**
@@ -38,7 +50,7 @@ public class GuordMainFrame extends javax.swing.JFrame {
     	
     	
         initComponents();
-        tse.setSelectedLanguage(Languages.ENGLISH);
+        //tse.getTs().setSelectedLanguage(Languages.ENGLISH);
         
         textArea.addCaretListener(new CaretListener() {
 			
@@ -56,14 +68,14 @@ public class GuordMainFrame extends javax.swing.JFrame {
 				else{
 					word=cnt.substring(lastspace+1,pos);	
 				}                                
-				String replacement=tse.check(word);
+				String replacement=tse.getTs().check(word, tse.getTs().getSelectedLanguage());
 				
 				if (replacement!=null){
 					final String _word=word;
 					final String _replacement=replacement;
-					SwingUtilities.invokeLater(new Runnable()
+					SwingUtilities.invokeLater(new Runnable()                                                
 					{
-						public void run(){
+                                                        public void run(){
 							textArea.setText(textArea.getText().replace(_word, _replacement));
 						}
 					});
@@ -84,6 +96,7 @@ public class GuordMainFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        jMenuItem1 = new javax.swing.JMenuItem();
         textjsp = new javax.swing.JScrollPane();
         textArea = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -92,8 +105,13 @@ public class GuordMainFrame extends javax.swing.JFrame {
         loadMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
+        jMenu3 = new javax.swing.JMenu();
+        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
 
         jFormattedTextField1.setText("jFormattedTextField1");
+
+        jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -134,6 +152,28 @@ public class GuordMainFrame extends javax.swing.JFrame {
         jMenu2.setText("Edit");
         jMenuBar1.add(jMenu2);
 
+        jMenu3.setText("Language");
+
+        jRadioButtonMenuItem1.setSelected(true);
+        jRadioButtonMenuItem1.setText("Eng");
+        jRadioButtonMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRadioButtonMenuItem1);
+
+        jRadioButtonMenuItem2.setSelected(true);
+        jRadioButtonMenuItem2.setText("Spa");
+        jRadioButtonMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jRadioButtonMenuItem2);
+
+        jMenuBar1.add(jMenu3);
+
         setJMenuBar(jMenuBar1);
 
         pack();
@@ -142,68 +182,14 @@ public class GuordMainFrame extends javax.swing.JFrame {
     private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
         
         // prompt the user to enter the file name
-        String name = JOptionPane.showInputDialog(this, "Enter file name.");
-        if (!name.endsWith(".guord")){
-            name=name+".guord";
-        }
-        ObjectOutputStream oos=null;
-        try {
-            String body=textArea.getText();        
-            oos = new ObjectOutputStream(new FileOutputStream(defaultPath+name));
-            oos.writeObject(body);
-            oos.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(GuordMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(GuordMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                oos.close();
-            } catch (IOException ex) {
-                Logger.getLogger(GuordMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        tse.getTs().salvar(textArea);
         
         
     }//GEN-LAST:event_saveMenuItemActionPerformed
 
     private void loadMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuItemActionPerformed
         
-        String name=null;
-        
-        File filesPath=new File(defaultPath);
-        String[] choices=filesPath.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return (name.endsWith(".guord"));
-            }
-        });        
-        if (choices.length>0){
-            name = (String) JOptionPane.showInputDialog(null, "Choose document...",
-            "Choose document", JOptionPane.QUESTION_MESSAGE, null, // Use
-            choices, // Array of choices
-            choices[0]); // Initial choice            
-        }
-        else{
-            JOptionPane.showMessageDialog(null, "No documents found");
-        }
-        
-        if (name!=null){
-            ObjectInputStream ois=null;
-            try {            
-                ois = new ObjectInputStream(new FileInputStream(defaultPath+name));            
-                String obj=(String)ois.readObject();
-                textArea.setText(obj);
-            } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(GuordMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    if (ois!=null) ois.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(GuordMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }            
-        }
+      tse.getTs().cargar(textArea);
         
 
     }//GEN-LAST:event_loadMenuItemActionPerformed
@@ -211,6 +197,17 @@ public class GuordMainFrame extends javax.swing.JFrame {
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
+
+    private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
+      tse.getTs().setSelectedLanguage(defaultLanguage.ENGLISH);
+       
+        System.out.println("Lang set ok");
+    }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
+
+    private void jRadioButtonMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem2ActionPerformed
+       tse.getTs().setSelectedLanguage(defaultLanguage.SPANISH);
+        System.out.println("Lang set ok");
+    }//GEN-LAST:event_jRadioButtonMenuItem2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -242,7 +239,8 @@ public class GuordMainFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                GuordMainFrame mf=new GuordMainFrame();
+                   ApplicationContext apc = new ClassPathXmlApplicationContext("appiclationContext.xml");
+              GuordMainFrame mf = apc.getBean(GuordMainFrame.class);
                 mf.setSize(800,600);
                 mf.setVisible(true);
             }
@@ -254,7 +252,11 @@ public class GuordMainFrame extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
     private javax.swing.JMenuItem loadMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JTextArea textArea;
